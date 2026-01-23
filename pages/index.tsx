@@ -1,18 +1,40 @@
 import { readdirSync, statSync } from 'fs';
 import { join } from 'path';
 import { GetStaticProps } from 'next';
+import { useState } from 'react';
 
 interface FileItem {
   name: string;
   path: string;
   size: number;
+  type: string;
 }
 
 interface HomeProps {
   files: FileItem[];
 }
 
+function getFileIcon(type: string): string {
+  if (type.startsWith('video/')) return '🎥';
+  if (type.startsWith('audio/')) return '🎵';
+  if (type.startsWith('image/')) return '🖼️';
+  if (type === 'application/pdf') return '📄';
+  if (type.startsWith('text/')) return '📝';
+  if (type === 'application/zip' || type.includes('archive')) return '📦';
+  return '📎';
+}
+
 export default function Home({ files }: HomeProps) {
+  const [copiedPath, setCopiedPath] = useState<string | null>(null);
+
+  const copyToClipboard = (path: string) => {
+    const fullUrl = `${window.location.origin}/files/${path}`;
+    navigator.clipboard.writeText(fullUrl).then(() => {
+      setCopiedPath(path);
+      setTimeout(() => setCopiedPath(null), 2000);
+    });
+  };
+
   return (
     <div style={{ 
       fontFamily: 'system-ui, sans-serif', 
@@ -59,27 +81,46 @@ export default function Home({ files }: HomeProps) {
                 border: '1px solid #e0e0e0'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <strong>{file.name}</strong>
-                    <div style={{ fontSize: '0.85rem', color: '#666', marginTop: '4px' }}>
-                      {(file.size / 1024).toFixed(2)} KB
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ fontSize: '1.5rem' }}>{getFileIcon(file.type)}</span>
+                    <div>
+                      <strong>{file.name}</strong>
+                      <div style={{ fontSize: '0.85rem', color: '#666', marginTop: '4px' }}>
+                        {(file.size / 1024).toFixed(2)} KB
+                      </div>
                     </div>
                   </div>
-                  <a 
-                    href={`/files/${file.path}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      padding: '8px 16px',
-                      background: '#0070f3',
-                      color: 'white',
-                      textDecoration: 'none',
-                      borderRadius: '5px',
-                      fontSize: '0.9rem'
-                    }}
-                  >
-                    Open
-                  </a>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      onClick={() => copyToClipboard(file.path)}
+                      style={{
+                        padding: '8px 16px',
+                        background: copiedPath === file.path ? '#10b981' : '#6b7280',
+                        color: 'white',
+                        border: 'none',
+                        cursor: 'pointer',
+                        borderRadius: '5px',
+                        fontSize: '0.9rem'
+                      }}
+                    >
+                      {copiedPath === file.path ? '✓ Copied' : '📋 Copy'}
+                    </button>
+                    <a 
+                      href={`/files/${file.path}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        padding: '8px 16px',
+                        background: '#0070f3',
+                        color: 'white',
+                        textDecoration: 'none',
+                        borderRadius: '5px',
+                        fontSize: '0.9rem'
+                      }}
+                    >
+                      Open
+                    </a>
+                  </div>
                 </div>
                 <div style={{ 
                   marginTop: '8px', 
@@ -121,10 +162,39 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   const filesDir = join(process.cwd(), 'public', 'files');
   let files: FileItem[] = [];
   
+  const getContentType = (filename: string): string => {
+    const ext = filename.split('.').pop()?.toLowerCase() || '';
+    const contentTypes: { [key: string]: string } = {
+      // Video
+      'mp4': 'video/mp4',
+      'mov': 'video/quicktime',
+      'avi': 'video/x-msvideo',
+      'webm': 'video/webm',
+      // Audio
+      'mp3': 'audio/mpeg',
+      'wav': 'audio/wav',
+      'ogg': 'audio/ogg',
+      // Images
+      'jpg': 'image/jpeg',
+      'jpeg': 'image/jpeg',
+      'png': 'image/png',
+      'gif': 'image/gif',
+      'svg': 'image/svg+xml',
+      'webp': 'image/webp',
+      // Documents
+      'pdf': 'application/pdf',
+      'txt': 'text/plain',
+      'csv': 'text/csv',
+      // Archives
+      'zip': 'application/zip',
+    };
+    return contentTypes[ext] || 'application/octet-stream';
+  };
+  
   try {
     const dirContents = readdirSync(filesDir);
     files = dirContents
-      .map((name) => {
+      .map((name: string) => {
         const fullPath = join(filesDir, name);
         const stats = statSync(fullPath);
         
@@ -137,6 +207,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
           name,
           path: name,
           size: stats.size,
+          type: getContentType(name),
         };
       })
       .filter((file): file is FileItem => file !== null);

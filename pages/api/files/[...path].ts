@@ -35,21 +35,37 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     // Determine content type based on file extension
     const ext = filePath.split('.').pop()?.toLowerCase();
     const contentTypes: { [key: string]: string } = {
+      // Video
       'mp4': 'video/mp4',
+      'mov': 'video/quicktime',
+      'avi': 'video/x-msvideo',
+      'webm': 'video/webm',
+      // Audio
       'mp3': 'audio/mpeg',
       'wav': 'audio/wav',
+      'ogg': 'audio/ogg',
+      // Images
       'jpg': 'image/jpeg',
       'jpeg': 'image/jpeg',
       'png': 'image/png',
       'gif': 'image/gif',
       'svg': 'image/svg+xml',
+      'webp': 'image/webp',
+      'ico': 'image/x-icon',
+      // Documents
       'pdf': 'application/pdf',
       'txt': 'text/plain',
+      'csv': 'text/csv',
+      // Web
       'html': 'text/html',
       'css': 'text/css',
       'js': 'application/javascript',
       'json': 'application/json',
+      'xml': 'application/xml',
+      // Archives
       'zip': 'application/zip',
+      'tar': 'application/x-tar',
+      'gz': 'application/gzip',
     };
     
     const contentType = contentTypes[ext || ''] || 'application/octet-stream';
@@ -58,6 +74,14 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     res.setHeader('Content-Type', contentType);
     res.setHeader('Content-Length', fileBuffer.length);
     res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    
+    // Handle OPTIONS preflight request
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
+    }
     
     // Send file
     return res.status(200).send(fileBuffer);

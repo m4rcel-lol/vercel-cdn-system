@@ -59,12 +59,12 @@ For example:
 ### Supported File Types
 
 The CDN supports various file types including:
-- **Videos**: mp4
-- **Audio**: mp3, wav
-- **Images**: jpg, jpeg, png, gif, svg
-- **Documents**: pdf, txt
-- **Web**: html, css, js, json
-- **Archives**: zip
+- **Videos**: mp4, mov, avi, webm
+- **Audio**: mp3, wav, ogg
+- **Images**: jpg, jpeg, png, gif, svg, webp, ico
+- **Documents**: pdf, txt, csv
+- **Web**: html, css, js, json, xml
+- **Archives**: zip, tar, gz
 - And more (served as `application/octet-stream`)
 
 ## Deployment to Vercel
@@ -94,9 +94,38 @@ vercel-cdn-system/
 ## How It Works
 
 1. Files are stored in `public/files/` directory
-2. The API route at `/api/files/[...path]` serves these files
+2. The API route at `/api/files/[...path]` serves these files with proper content types
 3. URL rewrites in `vercel.json` map `/files/*` to the API route
 4. The homepage displays all available files with shareable links
+5. Click "Copy" button to copy the full URL to clipboard
+6. Security features include path traversal protection and proper content type headers
+
+## Features
+
+- 📁 **Easy File Management**: Just drop files in `public/files/`
+- 🔗 **Instant URLs**: Get shareable links immediately
+- 🚀 **Optimized Performance**: Leverages Vercel's CDN with caching
+- 📝 **Beautiful UI**: Clean interface with file type icons
+- 📋 **Copy to Clipboard**: One-click URL copying
+- 🔒 **Secure**: Path traversal protection and security headers
+- 🎯 **Wide Format Support**: Videos, images, audio, documents, and more
+- 🌐 **CORS Enabled**: Access files from any domain
+
+## Troubleshooting
+
+### Files not showing up
+- Ensure files are placed in `public/files/` (not just `files/`)
+- Run `npm run build` to regenerate static pages
+- Check file permissions
+
+### Type errors during build
+- Run `npm install` to ensure all dependencies are installed
+- Run `npm run type-check` to verify TypeScript compilation
+
+### Deployment issues
+- Ensure Node.js version is 18.0.0 or higher
+- Check Vercel build logs for specific errors
+- Verify `vercel.json` configuration is present
 
 ## License
 
