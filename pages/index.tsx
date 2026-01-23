@@ -91,7 +91,7 @@ export default function Home({ files }: HomeProps) {
                   borderRadius: '4px',
                   wordBreak: 'break-all'
                 }}>
-                  {typeof window !== 'undefined' ? window.location.origin : ''}/files/{file.path}
+                  /files/{file.path}
                 </div>
               </li>
             ))}
