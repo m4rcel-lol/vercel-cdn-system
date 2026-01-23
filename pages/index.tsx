@@ -29,10 +29,16 @@ export default function Home({ files }: HomeProps) {
 
   const copyToClipboard = (path: string) => {
     const fullUrl = `${window.location.origin}/files/${path}`;
-    navigator.clipboard.writeText(fullUrl).then(() => {
-      setCopiedPath(path);
-      setTimeout(() => setCopiedPath(null), 2000);
-    });
+    navigator.clipboard.writeText(fullUrl)
+      .then(() => {
+        setCopiedPath(path);
+        setTimeout(() => setCopiedPath(null), 2000);
+      })
+      .catch((err) => {
+        console.error('Failed to copy:', err);
+        // Fallback: user will need to manually copy
+        alert('Failed to copy to clipboard. Please copy the URL manually.');
+      });
   };
 
   return (
@@ -194,7 +200,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   try {
     const dirContents = readdirSync(filesDir);
     files = dirContents
-      .map((name: string) => {
+      .map((name) => {
         const fullPath = join(filesDir, name);
         const stats = statSync(fullPath);
         
