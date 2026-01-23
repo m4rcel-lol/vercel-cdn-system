@@ -127,16 +127,19 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
       .map((name) => {
         const fullPath = join(filesDir, name);
         const stats = statSync(fullPath);
+        
+        // Only include actual files, not directories
+        if (!stats.isFile()) {
+          return null;
+        }
+        
         return {
           name,
           path: name,
           size: stats.size,
         };
       })
-      .filter((file) => {
-        const fullPath = join(filesDir, file.name);
-        return statSync(fullPath).isFile();
-      });
+      .filter((file): file is FileItem => file !== null);
   } catch (error) {
     // Directory doesn't exist or is empty
     console.log('Files directory is empty or does not exist');

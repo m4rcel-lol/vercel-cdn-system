@@ -1,5 +1,5 @@
 import { readFileSync, existsSync, statSync } from 'fs';
-import { join } from 'path';
+import { join, resolve, normalize } from 'path';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -7,7 +7,15 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   
   // Construct the file path
   const filePath = Array.isArray(path) ? path.join('/') : path || '';
-  const fullPath = join(process.cwd(), 'public', 'files', filePath);
+  
+  // Security: Normalize and resolve the path to prevent directory traversal
+  const filesRoot = join(process.cwd(), 'public', 'files');
+  const fullPath = normalize(join(filesRoot, filePath));
+  
+  // Security: Ensure the resolved path is within the files directory
+  if (!fullPath.startsWith(filesRoot)) {
+    return res.status(403).json({ error: 'Access denied' });
+  }
   
   // Check if file exists
   if (!existsSync(fullPath)) {
