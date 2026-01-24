@@ -41,20 +41,27 @@ npm run dev
 
 ### Adding Files
 
-1. Place your files in the `public/files/` directory
+1. Place your files in the appropriate subdirectory within `public/files/`:
+   - **Images**: `public/files/images/` - for jpg, png, gif, svg, webp, ico files
+   - **Videos**: `public/files/videos/` - for mp4, mov, avi, webm files
+   - **Audio**: `public/files/audio/` - for mp3, wav, ogg files
+   - **GIFs**: `public/files/gifs/` - for gif animations
+   - **Archives**: `public/files/archives/` - for zip, tar, gz files
+   - **Documents**: `public/files/documents/` - for pdf, txt, csv files
+   - **Web**: `public/files/web/` - for html, css, js, json, xml files
 2. Files will automatically be available via the CDN
 
 ### Accessing Files
 
 Files can be accessed via the following URL pattern:
 ```
-https://your-domain.vercel.app/files/filename.ext
+https://your-domain.vercel.app/files/subdirectory/filename.ext
 ```
 
 For example:
-- `https://your-domain.vercel.app/files/test.txt`
-- `https://your-domain.vercel.app/files/video.mp4`
-- `https://your-domain.vercel.app/files/image.png`
+- `https://your-domain.vercel.app/files/documents/test.txt`
+- `https://your-domain.vercel.app/files/videos/video.mp4`
+- `https://your-domain.vercel.app/files/images/image.png`
 
 ### JSON API for File Metadata
 
@@ -142,6 +149,13 @@ vercel-cdn-system/
 │   └── index.tsx                    # Homepage with file listing
 ├── public/
 │   └── files/                       # Place your CDN files here
+│       ├── images/                  # Image files (jpg, png, gif, svg, webp, ico)
+│       ├── videos/                  # Video files (mp4, mov, avi, webm)
+│       ├── audio/                   # Audio files (mp3, wav, ogg)
+│       ├── gifs/                    # GIF animations
+│       ├── archives/                # Compressed files (zip, tar, gz)
+│       ├── documents/               # Documents (pdf, txt, csv)
+│       └── web/                     # Web files (html, css, js, json, xml)
 ├── package.json
 ├── tsconfig.json
 └── vercel.json                      # Vercel configuration
@@ -149,8 +163,8 @@ vercel-cdn-system/
 
 ## How It Works
 
-1. Files are stored in `public/files/` directory
-2. The API route at `/api/files/[...path]` serves these files with proper content types
+1. Files are organized in subdirectories within `public/files/` (images, videos, audio, gifs, archives, documents, web)
+2. The API route at `/api/files/[...path]` serves these files with proper content types, supporting nested paths
 3. The JSON API route at `/api/json/files/[...path]` provides file metadata in JSON format
 4. URL rewrites in `vercel.json` map `/files/*` to the API route
 5. The homepage displays all available files with shareable links
@@ -159,7 +173,7 @@ vercel-cdn-system/
 
 ## Features
 
-- 📁 **Easy File Management**: Just drop files in `public/files/`
+- 📁 **Easy File Management**: Organized subdirectories in `public/files/` for different file types
 - 🔗 **Instant URLs**: Get shareable links immediately
 - 📊 **JSON API**: Get file metadata in JSON format for integration
 - 🚀 **Optimized Performance**: Leverages Vercel's CDN with caching
