@@ -197,26 +197,45 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     return contentTypes[ext] || 'application/octet-stream';
   };
   
-  try {
-    const dirContents = readdirSync(filesDir);
-    files = dirContents
-      .map((name) => {
-        const fullPath = join(filesDir, name);
-        const stats = statSync(fullPath);
-        
-        // Only include actual files, not directories
-        if (!stats.isFile()) {
-          return null;
+  // Recursive function to scan directories
+  const scanDirectory = (dirPath: string, relativePath: string = ''): FileItem[] => {
+    const result: FileItem[] = [];
+    
+    try {
+      const dirContents = readdirSync(dirPath);
+      
+      for (const name of dirContents) {
+        // Skip README.md files
+        if (name === 'README.md') {
+          continue;
         }
         
-        return {
-          name,
-          path: name,
-          size: stats.size,
-          type: getContentType(name),
-        };
-      })
-      .filter((file): file is FileItem => file !== null);
+        const fullPath = join(dirPath, name);
+        const stats = statSync(fullPath);
+        const itemRelativePath = relativePath ? join(relativePath, name) : name;
+        
+        if (stats.isDirectory()) {
+          // Recursively scan subdirectories
+          result.push(...scanDirectory(fullPath, itemRelativePath));
+        } else if (stats.isFile()) {
+          // Add file to results
+          result.push({
+            name,
+            path: itemRelativePath,
+            size: stats.size,
+            type: getContentType(name),
+          });
+        }
+      }
+    } catch (error) {
+      console.error(`Error scanning directory ${dirPath}:`, error);
+    }
+    
+    return result;
+  };
+  
+  try {
+    files = scanDirectory(filesDir);
   } catch (error) {
     // Directory doesn't exist or is empty
     console.log('Files directory is empty or does not exist');
