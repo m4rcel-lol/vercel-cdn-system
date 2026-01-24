@@ -56,6 +56,59 @@ For example:
 - `https://your-domain.vercel.app/files/video.mp4`
 - `https://your-domain.vercel.app/files/image.png`
 
+### JSON API for File Metadata
+
+Get file metadata as JSON via the following URL pattern:
+```
+https://your-domain.vercel.app/api/json/files/filename.ext
+```
+
+The API returns detailed information about files including:
+- File name, path, and full URL
+- File size and MIME type
+- Last modified timestamp
+- Whether it's a file or directory
+
+Example responses:
+
+**For a file:**
+```json
+{
+  "name": "test.txt",
+  "path": "test.txt",
+  "url": "https://your-domain.vercel.app/files/test.txt",
+  "size": 215,
+  "type": "text/plain",
+  "isDirectory": false,
+  "lastModified": "2026-01-24T12:05:59.798Z"
+}
+```
+
+**For a directory:**
+```json
+{
+  "name": "images",
+  "path": "images",
+  "url": "https://your-domain.vercel.app/files/images",
+  "isDirectory": true,
+  "files": [
+    {
+      "name": "photo.jpg",
+      "path": "images/photo.jpg",
+      "url": "https://your-domain.vercel.app/files/images/photo.jpg",
+      "size": 1234567,
+      "type": "image/jpeg",
+      "isDirectory": false,
+      "lastModified": "2026-01-24T12:05:59.775Z"
+    }
+  ]
+}
+```
+
+Supports nested paths and subdirectories:
+- `https://your-domain.vercel.app/api/json/files/videos/clips/clip1.mp4`
+- `https://your-domain.vercel.app/api/json/files/images/photos`
+
 ### Supported File Types
 
 The CDN supports various file types including:
@@ -81,29 +134,34 @@ Your CDN will be available at your Vercel deployment URL.
 vercel-cdn-system/
 ├── pages/
 │   ├── api/
-│   │   └── files/
-│   │       └── [...path].ts    # API route for serving files
-│   └── index.tsx                # Homepage with file listing
+│   │   ├── files/
+│   │   │   └── [...path].ts         # API route for serving files
+│   │   └── json/
+│   │       └── files/
+│   │           └── [...path].ts     # JSON API for file metadata
+│   └── index.tsx                    # Homepage with file listing
 ├── public/
-│   └── files/                   # Place your CDN files here
+│   └── files/                       # Place your CDN files here
 ├── package.json
 ├── tsconfig.json
-└── vercel.json                  # Vercel configuration
+└── vercel.json                      # Vercel configuration
 ```
 
 ## How It Works
 
 1. Files are stored in `public/files/` directory
 2. The API route at `/api/files/[...path]` serves these files with proper content types
-3. URL rewrites in `vercel.json` map `/files/*` to the API route
-4. The homepage displays all available files with shareable links
-5. Click "Copy" button to copy the full URL to clipboard
-6. Security features include path traversal protection and proper content type headers
+3. The JSON API route at `/api/json/files/[...path]` provides file metadata in JSON format
+4. URL rewrites in `vercel.json` map `/files/*` to the API route
+5. The homepage displays all available files with shareable links
+6. Click "Copy" button to copy the full URL to clipboard
+7. Security features include path traversal protection and proper content type headers
 
 ## Features
 
 - 📁 **Easy File Management**: Just drop files in `public/files/`
 - 🔗 **Instant URLs**: Get shareable links immediately
+- 📊 **JSON API**: Get file metadata in JSON format for integration
 - 🚀 **Optimized Performance**: Leverages Vercel's CDN with caching
 - 📝 **Beautiful UI**: Clean interface with file type icons
 - 📋 **Copy to Clipboard**: One-click URL copying
