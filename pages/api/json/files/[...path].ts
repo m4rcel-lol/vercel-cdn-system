@@ -1,5 +1,5 @@
 import { existsSync, statSync, readdirSync } from 'fs';
-import { join, resolve, relative } from 'path';
+import { join, resolve, relative, sep } from 'path';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface FileInfo {
@@ -31,7 +31,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   const fullPath = resolve(filesRoot, filePath);
   
   // Security: Ensure the resolved path is within the files directory
-  if (!fullPath.startsWith(filesRoot + require('path').sep) && fullPath !== filesRoot) {
+  if (!fullPath.startsWith(filesRoot + sep) && fullPath !== filesRoot) {
     return res.status(403).json({ error: 'Access denied' });
   }
   
@@ -84,7 +84,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     };
     
     // Get the base URL from the request
-    const protocol = req.headers['x-forwarded-proto'] || 'http';
+    const protocol = req.headers['x-forwarded-proto'] || 'https';
     const host = req.headers['x-forwarded-host'] || req.headers.host;
     const baseUrl = `${protocol}://${host}`;
     
