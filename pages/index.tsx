@@ -35,13 +35,23 @@ export default function Home({ fileStructure }: HomeProps) {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
     
+    const debouncedCheckMobile = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(checkMobile, 150);
+    };
+    
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener('resize', debouncedCheckMobile);
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('resize', debouncedCheckMobile);
+    };
   }, []);
 
   const copyToClipboard = (path: string) => {
@@ -63,8 +73,8 @@ export default function Home({ fileStructure }: HomeProps) {
 
   const navigateBack = () => {
     const pathParts = currentPath.split('/').filter(Boolean);
-    pathParts.pop();
-    setCurrentPath(pathParts.join('/'));
+    const newPath = pathParts.slice(0, -1).join('/');
+    setCurrentPath(newPath);
   };
 
   const currentItems = fileStructure[currentPath] || [];
@@ -421,7 +431,13 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     return contentTypes[ext] || 'application/octet-stream';
   };
   
-  const scanDirectory = (dirPath: string, relativePath: string = '') => {
+  const scanDirectory = (dirPath: string, relativePath: string = '', depth: number = 0) => {
+    // Limit recursion depth to prevent stack overflow
+    if (depth > 10) {
+      console.warn(`Max recursion depth reached at: ${relativePath}`);
+      return;
+    }
+    
     try {
       const items = readdirSync(dirPath);
       const currentDirItems: FileItem[] = [];
@@ -442,7 +458,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
           });
           
           // Recursively scan subdirectory
-          scanDirectory(fullPath, itemRelativePath);
+          scanDirectory(fullPath, itemRelativePath, depth + 1);
         } else if (stats.isFile()) {
           // Add file to current level
           currentDirItems.push({
