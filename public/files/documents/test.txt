@@ -1,6 +1,6 @@
 This is a test file for the Vercel CDN system.
 
 You can access this file via the URL:
-https://your-domain.vercel.app/files/test.txt
+https://your-domain.vercel.app/files/documents/test.txt
 
-Add more files to the public/files/ directory to make them available via the CDN!
+Add more files to the appropriate subdirectories in public/files/ to make them available via the CDN!
