@@ -1,5 +1,5 @@
 import { existsSync, statSync, readdirSync } from 'fs';
-import { join, resolve, extname } from 'path';
+import { join, resolve, extname, sep } from 'path';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface FileMetadata {
@@ -32,7 +32,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   const fullPath = resolve(filesRoot, filePath);
   
   // Security: Ensure the resolved path is within the files directory
-  if (!fullPath.startsWith(filesRoot + require('path').sep) && fullPath !== filesRoot) {
+  if (!fullPath.startsWith(filesRoot + sep) && fullPath !== filesRoot) {
     return res.status(403).json({ 
       error: 'Access denied',
       message: 'Path traversal detected'
@@ -110,7 +110,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       return res.status(200).json(metadata);
     }
   } catch (error) {
-    console.error('Error reading file/directory:', error);
+    console.error('Error reading file/directory');
     return res.status(500).json({ 
       error: 'Internal server error',
       message: 'Error reading file or directory'
