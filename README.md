@@ -56,6 +56,60 @@ For example:
 - `https://your-domain.vercel.app/files/video.mp4`
 - `https://your-domain.vercel.app/files/image.png`
 
+### JSON API
+
+Get file metadata in JSON format using the API endpoint:
+```
+https://your-domain.vercel.app/api/json/files/path/to/file.ext
+```
+
+**For a single file:**
+```bash
+curl https://your-domain.vercel.app/api/json/files/pictures/image.png
+```
+
+Returns:
+```json
+{
+  "name": "image.png",
+  "path": "pictures/image.png",
+  "size": 41595,
+  "sizeFormatted": "40.62 KB",
+  "type": "image",
+  "contentType": "image/png",
+  "isDirectory": false,
+  "url": "/files/pictures/image.png",
+  "lastModified": "2026-01-24T11:39:20.921Z"
+}
+```
+
+**For a directory:**
+```bash
+curl https://your-domain.vercel.app/api/json/files/videos/screenrecordings
+```
+
+Returns:
+```json
+{
+  "name": "screenrecordings",
+  "path": "videos/screenrecordings",
+  "isDirectory": true,
+  "items": [
+    {
+      "name": "video1.mp4",
+      "path": "videos/screenrecordings/video1.mp4",
+      "size": 10444229,
+      "sizeFormatted": "9.96 MB",
+      "type": "video",
+      "contentType": "video/mp4",
+      "isDirectory": false,
+      "url": "/files/videos/screenrecordings/video1.mp4",
+      "lastModified": "2026-01-24T11:39:20.943Z"
+    }
+  ]
+}
+```
+
 ### Supported File Types
 
 The CDN supports various file types including:
